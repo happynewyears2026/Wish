@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>සුබ අලුත් අවුරුද්දක් වේවා!</title>
+    <style>
+        body {
+            background: radial-gradient(circle, #1a0101, #000000);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* මැද බොක්ස් එකේ ප්‍රමාණය මෙතනින් අඩු කළා (max-width: 320px) */
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            padding: 25px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 40px rgba(255, 69, 0, 0.3);
+            text-align: center;
+            width: 80%;
+            max-width: 320px; 
+            position: relative;
+            z-index: 100;
+            color: white;
+            animation: bounceIn 1s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        h1 { color: #ffeb3b; font-size: 20px; text-shadow: 0 0 10px rgba(255, 235, 59, 0.5); margin-top: 10px; }
+        p { font-size: 14px; opacity: 0.9; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+        
+        .btn-whatsapp {
+            background: linear-gradient(45deg, #25D366, #128C7E);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        /* Footer - පැහැදිලිව පේන වර්ණවලින් */
+        footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #ffeb3b; 
+            font-size: 12px;
+            z-index: 100;
+            line-height: 1.6;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        footer b {
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        #fwCanvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body onclick="startSounds()">
+
+    <audio id="kohaAudio" loop>
+        <source src="https://www.soundboard.com/handler/DownLoadTrack.ashx?cliptoken=661858e3-5490-484d-9669-77764724040e" type="audio/mpeg">
+    </audio>
+    <audio id="fireworkAudio" loop>
+        <source src="https://www.fesliyanstudios.com/play-mp3/6684" type="audio/mpeg">
+    </audio>
+
+    <canvas id="fwCanvas"></canvas>
+
+    <div class="card">
+        <div style="font-size: 50px; filter: drop-shadow(0 0 10px #ff9800);">🏮</div>
+        <h1>සුබ අලුත් අවුරුද්දක් වේවා!</h1>
+        <p>ඔබේ අංකය ඇතුළත් කර <br>සුබපැතුම යවන්න</p>
+        
+        <input type="tel" id="phoneNum" placeholder="07XXXXXXXX" maxlength="10" onfocus="startSounds()">
+        
+        <button class="btn-whatsapp" onclick="wishMe()">
+            WhatsApp කරන්න 🎊
+        </button>
+    </div>
+
+    <footer>
+        ©2026 All Rights Reserved <br>
+        Design & Powered By <b>Kaveen Chamodya</b>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('fwCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        let soundsStarted = false;
+
+        function startSounds() {
+            if (!soundsStarted) {
+                document.getElementById("kohaAudio").play().catch(() => {});
+                document.getElementById("fireworkAudio").play().catch(() => {});
+                createFirework();
+                soundsStarted = true;
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color, velocity) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = velocity;
+                this.alpha = 1;
+                this.friction = 0.96;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.velocity.y += 0.05;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= 0.012;
+            }
+        }
+
+        function createFirework() {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * (canvas.height / 2);
+            const color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+            
+            for (let i = 0; i < 100; i++) {
+                const angle = (Math.PI * 2) / 100 * i;
+                const speed = Math.random() * 6 + 2;
+                particles.push(new Particle(x, y, color, {
+                    x: Math.cos(angle) * speed,
+                    y: Math.sin(angle) * speed
+                }));
+            }
+            setTimeout(createFirework, Math.random() * 1500 + 500);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((particle, index) => {
+                if (particle.alpha > 0) {
+                    particle.update();
+                    particle.draw();
+                } else {
+                    particles.splice(index, 1);
+                }
+            });
+        }
+
+        function wishMe() {
+            startSounds();
+            let number = document.getElementById("phoneNum").value;
+            if (number.length < 10) { alert("අංකය පරීක්ෂා කරන්න"); return; }
+            if (number.startsWith("0")) number = "94" + number.substring(1);
+            const msg = "🏮 *සුබ අලුත් අවුරුද්දක් වේවා!* 🏮\n\nඔබටත් ඔබේ පවුලේ සැමටත් සාමය, සතුට, සෞභාග්‍යය සපිරි සුබම සුබ අලුත් අවුරුද්දක් වේවා! 🌸✨";
+            window.open(`https://wa.me/${number}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        animate();
+    </script>
+</body>
+</html>
